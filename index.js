@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { async } = require('@firebase/util');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 
@@ -40,6 +41,17 @@ const run = async () => {
 			};
 			const result = await servicesColection.findOne(query);
 
+			res.send(result);
+		});
+
+		app.post('/reviews', async (req, res) => {
+			const reviews = req.body;
+			console.log(reviews);
+			const result = await reviewsColection.insertOne(reviews);
+			res.send(result);
+		});
+		app.get('/reviews', async (req, res) => {
+			const result = await reviewsColection.find({}).toArray();
 			res.send(result);
 		});
 	} finally {
