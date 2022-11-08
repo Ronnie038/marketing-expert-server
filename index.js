@@ -54,6 +54,18 @@ const run = async () => {
 			const result = await reviewsColection.find({}).toArray();
 			res.send(result);
 		});
+		app.get('/reviewsByQuery', async (req, res) => {
+			let query = {};
+
+			if (req.query.email) {
+				query = {
+					email: req.query.email,
+				};
+			}
+
+			const result = await reviewsColection.find(query).toArray();
+			res.send(result);
+		});
 	} finally {
 	}
 };
