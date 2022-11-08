@@ -18,15 +18,24 @@ const client = new MongoClient(uri, {
 
 const run = async () => {
 	try {
-		const database = client.db('assignment-11 ');
+		const database = client.db('assignment-11');
 		const servicesColection = database.collection('services');
 		const reviewsColection = database.collection('reviews');
+
+		app.get('/services', async (req, res) => {
+			const query = {};
+			const result = await servicesColection.find(query).toArray();
+			res.send(result);
+		});
 	} finally {
 	}
 };
 
+run();
+
 app.get('/', (req, res) => {
 	console.log('hello from behind');
+	res.send('hello behind');
 });
 
 app.listen(port, () => {
