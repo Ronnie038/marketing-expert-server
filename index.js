@@ -27,6 +27,12 @@ const run = async () => {
 			const result = await servicesColection.find(query).toArray();
 			res.send(result);
 		});
+		app.get('/services-home', async (req, res) => {
+			const query = {};
+
+			const result = await servicesColection.find(query).limit(3).toArray();
+			res.send(result);
+		});
 	} finally {
 	}
 };
