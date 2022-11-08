@@ -66,6 +66,26 @@ const run = async () => {
 			const result = await reviewsColection.find(query).toArray();
 			res.send(result);
 		});
+
+		app.put('/reviews/:id', async (req, res) => {
+			const _id = req.params.id;
+			const review = req.body;
+			const option = { upsert: true };
+			const filter = { _id: ObjectId(_id) };
+			const updatedReview = {
+				$set: {
+					review: review.review,
+				},
+			};
+
+			const result = await reviewsColection.findOneAndUpdate(
+				filter,
+				updatedReview,
+				option
+			);
+			console.log(result);
+			res.send(option);
+		});
 	} finally {
 	}
 };
