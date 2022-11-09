@@ -28,6 +28,15 @@ const run = async () => {
 			const result = await servicesColection.find(query).toArray();
 			res.send(result);
 		});
+		app.post('/services', async (req, res) => {
+			const service = req.body;
+
+			const result = await servicesColection.insertOne(service);
+
+			res.send(result);
+
+			console.log(service);
+		});
 		app.get('/services-home', async (req, res) => {
 			const query = {};
 
