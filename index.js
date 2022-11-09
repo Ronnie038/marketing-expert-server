@@ -57,7 +57,7 @@ const run = async () => {
 		});
 
 		// inserting new service in database
-		app.post('/services', async (req, res) => {
+		app.post('/services', verigyJWT, async (req, res) => {
 			const service = req.body;
 
 			const result = await servicesColection.insertOne(service);
