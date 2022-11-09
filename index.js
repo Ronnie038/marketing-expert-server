@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const { async } = require('@firebase/util');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
@@ -17,17 +18,45 @@ const client = new MongoClient(uri, {
 	serverApi: ServerApiVersion.v1,
 });
 
+const verigyJWT = (req, res, next) => {
+	const authHeader = req.headers.authorization;
+
+	if (!authHeader) {
+		return res.status(401).send({ message: 'unauthorized' });
+	}
+	const token = authHeader.split(' ')[1];
+
+	jwt.verify(token, process.env.ACCESS_TOKEN_SERCRET, (err, decoded) => {
+		if (err) {
+			return res.status(401).send({ message: 'access forbidden' });
+		}
+		req.decoded = decoded;
+		next();
+	});
+};
+
 const run = async () => {
 	try {
 		const database = client.db('assignment-11');
 		const servicesColection = database.collection('services');
 		const reviewsColection = database.collection('reviews');
 
+		app.post('/jwt', (req, res) => {
+			const user = req.body;
+			const token = jwt.sign(user, process.env.ACCESS_TOKEN_SERCRET, {
+				expiresIn: '1h',
+			});
+
+			res.send({ token });
+		});
+		// getting all service from databse
 		app.get('/services', async (req, res) => {
 			const query = {};
 			const result = await servicesColection.find(query).toArray();
 			res.send(result);
 		});
+
+		// inserting new service in database
 		app.post('/services', async (req, res) => {
 			const service = req.body;
 
@@ -37,12 +66,16 @@ const run = async () => {
 
 			console.log(service);
 		});
+
+		// getting services for homepage
 		app.get('/services-home', async (req, res) => {
 			const query = {};
 
 			const result = await servicesColection.find(query).limit(3).toArray();
 			res.send(result);
 		});
+
+		// getting single service by id
 		app.get('/services/:id', async (req, res) => {
 			const id = req.params.id;
 			const query = {
@@ -53,17 +86,27 @@ const run = async () => {
 			res.send(result);
 		});
 
+		// adding new review from client side
 		app.post('/reviews', async (req, res) => {
 			const reviews = req.body;
 			console.log(reviews);
 			const result = await reviewsColection.insertOne(reviews);
 			res.send(result);
 		});
+
+		// getting all review from database
 		app.get('/reviews', async (req, res) => {
 			const result = await reviewsColection.find({}).toArray();
 			res.send(result);
 		});
-		app.get('/reviewsByQuery', async (req, res) => {
+
+		// getting CurrentUser reviews by query
+		app.get('/reviewsByQuery', verigyJWT, async (req, res) => {
+			const decoded = req.decoded;
+
+			if (decoded.email !== req.query.email) {
+				return res.status(403).send({ message: 'unauthorized access' });
+			}
 			let query = {};
 
 			if (req.query.email) {
@@ -75,6 +118,8 @@ const run = async () => {
 			const result = await reviewsColection.find(query).toArray();
 			res.send(result);
 		});
+
+		// updating reviews
 
 		app.put('/reviews/:id', async (req, res) => {
 			const _id = req.params.id;
@@ -95,6 +140,8 @@ const run = async () => {
 			console.log(result);
 			res.send(option);
 		});
+
+		// deleting reviews
 		app.delete('/reviews/:id', async (req, res) => {
 			const id = req.params.id;
 			const query = { _id: ObjectId(id) };
