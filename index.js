@@ -64,14 +64,20 @@ const run = async () => {
 
 			res.send(result);
 
-			console.log(service);
+			console.log(result);
 		});
 
 		// getting services for homepage
 		app.get('/services-home', async (req, res) => {
 			const query = {};
 
-			const result = await servicesColection.find(query).limit(3).toArray();
+			const mySort = { date: 1 };
+
+			const result = await servicesColection
+				.find(query)
+				.sort(mySort)
+				.limit(3)
+				.toArray();
 			res.send(result);
 		});
 
@@ -147,6 +153,15 @@ const run = async () => {
 			const query = { _id: ObjectId(id) };
 
 			const result = await reviewsColection.findOneAndDelete(query);
+			console.log(result);
+
+			res.send(result);
+		});
+		app.get('/reviews/:id', async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: ObjectId(id) };
+
+			const result = await reviewsColection.findOne(query);
 			console.log(result);
 
 			res.send(result);
