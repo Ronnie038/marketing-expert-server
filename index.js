@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const { async } = require('@firebase/util');
+
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 
@@ -71,7 +71,7 @@ const run = async () => {
 		app.get('/services-home', async (req, res) => {
 			const query = {};
 
-			const mySort = { date: 1 };
+			const mySort = { date: -1 };
 
 			const result = await servicesColection
 				.find(query)
